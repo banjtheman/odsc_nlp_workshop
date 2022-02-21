@@ -1,3 +1,8 @@
+# Added
+*.metaflow/
+*metaflow_card_cache/
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

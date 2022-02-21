@@ -1,0 +1,7 @@
+metaflow
+numpy
+vaderSentiment
+transformers
+pandas
+requests
+fasttext
