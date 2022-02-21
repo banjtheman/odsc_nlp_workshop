@@ -17,11 +17,15 @@ To install the prerequisites on your local machine run
 pip install -r requirements.txt
 ```
 
-### Module 1
+## Modules
 
-In this module we will setup Metaflow using a "hello world" flow to understand the basics of how to construct a Metaflow pipeline
+Each module will take you through steps to run a Metaflow pipeline. Each folder has a README with the instructions for the module. 
 
-### Module 2
+### Getting Started with Metaflow
+
+In this module we will setup Metaflow using a "hello world" flow to understand the basics of how to construct a Metaflow pipeline.
+
+### Preparing Data
 
 In this module we will extract the helpful review data from [AWS open data registry](https://registry.opendata.aws/helpful-sentences-from-reviews/) and prepare it for analysis. 
 
@@ -31,8 +35,8 @@ In this module we will run a VADER sentiment analysis on the text to evaluate if
 
 ### Module 4
 
-In this module we will update our pipeline to train a fasttext model alongside our VADER model to evaluate the text
+In this module we will update our pipeline to train a fasttext model alongside our VADER model to evaluate the text.
 
 ### Module 5
 
-In this module we will update our pipeline to run a huggingface transformer model alongside the others to evaluate the text
+In this module we will update our pipeline to run a huggingface transformer model alongside the others to evaluate the text.

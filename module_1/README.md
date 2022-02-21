@@ -18,11 +18,18 @@ python hello_flow.py show
 python hello_flow.py run
 ```
 
-3. Run the card command to visualize graph
+3. Run the card command to generate card html
 
 ```bash
-python hello_flow.py card view start
+python hello_flow.py card view start test.html
 ```
 
-4. Play around by adding another step, and changing my_var
+4. View card html in browser
+
+[![Show image](images/live_preview_button.png)]  
+
+[![Show image](images/metaflow_example.png)]
+
+
+5. Play around by adding another step, and changing my_var
 
