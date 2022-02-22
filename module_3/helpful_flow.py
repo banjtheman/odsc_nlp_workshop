@@ -56,6 +56,36 @@ class HelpfulFlow(FlowSpec):
         # save df to output folder
         self.df.to_csv(f"{self.output_dir}/helpful_sentences.csv", index=False)
 
+        self.next(self.vader_run)
+
+    @card
+    @step
+    def vader_run(self):
+
+        """
+        Run vader on data
+        """
+        # Transfrom raw data to a dataframe
+        self.results = helpful_funcs.test_vader(self.df)
+        self.run_name = "vader"
+
+        self.next(self.join)
+
+    @card
+    @step
+    def join(self):
+        """
+        Save data artifacts from the runs
+        """
+
+        print("Final Results")
+        print(self.results)
+
+        # save outputs
+        helpful_funcs.save_json(
+            f"{self.output_dir}/{self.run_name}_results.json", self.results
+        )
+
         self.next(self.end)
 
     @card

@@ -2,6 +2,7 @@
 *.metaflow/
 *metaflow_card_cache/
 .vscode/
+*test_run/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

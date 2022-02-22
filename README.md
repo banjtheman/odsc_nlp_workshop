@@ -29,14 +29,14 @@ In this module we will setup Metaflow using a "hello world" flow to understand t
 
 In this module we will extract the helpful review data from [AWS open data registry](https://registry.opendata.aws/helpful-sentences-from-reviews/) and prepare it for analysis. 
 
-### Module 3
+### VADER sentiment analysis
 
 In this module we will run a VADER sentiment analysis on the text to evaluate if we can determine that helpful is equivalent to positive.
 
-### Module 4
+### FastText Text Classification
 
 In this module we will update our pipeline to train a fasttext model alongside our VADER model to evaluate the text.
 
-### Module 5
+### Huggingface Transformers Classification
 
 In this module we will update our pipeline to run a huggingface transformer model alongside the others to evaluate the text.

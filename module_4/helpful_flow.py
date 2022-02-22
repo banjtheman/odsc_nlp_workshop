@@ -8,6 +8,7 @@ import utils as helpful_funcs
 # 3rd party imports
 from metaflow import FlowSpec, Parameter, step, card
 
+
 # How to run
 # python helpful_flow.py run --output_dir test_run
 
@@ -55,6 +56,68 @@ class HelpfulFlow(FlowSpec):
 
         # save df to output folder
         self.df.to_csv(f"{self.output_dir}/helpful_sentences.csv", index=False)
+
+        # We can call two functions to run in parallel
+        self.next(self.vader_run, self.fasttext_start)
+
+    @card
+    @step
+    def vader_run(self):
+
+        """
+        Run vader on data
+        """
+        # Transfrom raw data to a dataframe
+        self.results = helpful_funcs.test_vader(self.df)
+        self.run_name = "vader"
+        self.next(self.join)
+
+    @card
+    @step
+    def fasttext_start(self):
+
+        """
+        Convert data to fasttext format
+        """
+
+        helpful_funcs.convert_csv_to_fast_text_doc(self.df, self.output_dir)
+        self.next(self.fasttext_train)
+
+    @card
+    @step
+    def fasttext_train(self):
+
+        """
+        Train fasttext model
+        """
+
+        self.results = helpful_funcs.train_fasttext_model(self.output_dir)
+        self.run_name = "fasttext"
+
+        self.next(self.join)
+
+    @card
+    @step
+    def join(self, inputs):
+        """
+        Save data artifacts from the runs
+        """
+
+        self.results = [input.results for input in inputs]
+        self.run_names = [input.run_name for input in inputs]
+
+        print("Final Results")
+        print(self.results)
+        print(self.run_names)
+
+        for index, result in enumerate(self.results):
+
+            curr_name = self.run_names[index]
+
+            # save outputs
+            helpful_funcs.save_json(
+                f"{self.output_dir}/{curr_name}_results.json", result
+            )
 
         self.next(self.end)
 
