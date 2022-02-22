@@ -5,3 +5,4 @@ transformers
 pandas
 requests
 fasttext
+torch

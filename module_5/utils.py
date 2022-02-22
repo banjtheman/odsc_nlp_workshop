@@ -119,11 +119,11 @@ def run_hugging_face(df):
             sent_scores["miss"] += 1
 
         # If you just want to run on a few
-        # if index > 500:
+        # if index > 50:
         #     break
 
     print(sent_scores)
-    # num_sents = 500
+    # num_sents = 50
 
     # get percentages
     print(f"Pos correct: {sent_scores['pos_match']/num_sents}")
