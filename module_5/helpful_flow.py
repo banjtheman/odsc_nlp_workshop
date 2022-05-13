@@ -27,6 +27,7 @@ class HelpfulFlow(FlowSpec):
 
     # The helpful training data
     train_data = "https://helpful-sentences-from-reviews.s3.amazonaws.com/train.json"
+    test_data = "https://helpful-sentences-from-reviews.s3.amazonaws.com/test.json"
 
     @card
     @step
@@ -41,7 +42,8 @@ class HelpfulFlow(FlowSpec):
         os.system(cmd)
 
         # Get raw data
-        self.raw_data = helpful_funcs.get_data(self.train_data)
+        self.raw_data_train = helpful_funcs.get_data(self.train_data)
+        self.raw_data_test = helpful_funcs.get_data(self.test_data)
         self.next(self.prepare_data)
 
     @card
@@ -52,10 +54,16 @@ class HelpfulFlow(FlowSpec):
         prepare data
         """
         # Transfrom raw data to a dataframe
-        self.df = helpful_funcs.data_to_df(self.raw_data)
+        self.df_train = helpful_funcs.data_to_df(self.raw_data_train)
+        self.df_test = helpful_funcs.data_to_df(self.raw_data_test)
 
         # save df to output folder
-        self.df.to_csv(f"{self.output_dir}/helpful_sentences.csv", index=False)
+        self.df_train.to_csv(
+            f"{self.output_dir}/helpful_sentences_train.csv", index=False
+        )
+        self.df_test.to_csv(
+            f"{self.output_dir}/helpful_sentences_test.csv", index=False
+        )
 
         # We can call N functions to run in parallel
         self.next(self.vader_run, self.fasttext_start, self.huggingface_split)
@@ -68,7 +76,7 @@ class HelpfulFlow(FlowSpec):
         Run vader on data
         """
         # Transfrom raw data to a dataframe
-        self.results = helpful_funcs.test_vader(self.df)
+        self.results = helpful_funcs.test_vader(self.df_test)
         self.run_name = "vader"
 
         self.next(self.join)
@@ -81,7 +89,7 @@ class HelpfulFlow(FlowSpec):
         Convert data to fasttext format
         """
 
-        helpful_funcs.convert_csv_to_fast_text_doc(self.df, self.output_dir)
+        helpful_funcs.convert_csv_to_fast_text_doc(self.df_train, self.output_dir)
         self.next(self.fasttext_train)
 
     @card
@@ -92,8 +100,11 @@ class HelpfulFlow(FlowSpec):
         Train fasttext model
         """
 
-        self.results = helpful_funcs.train_fasttext_model(self.output_dir)
+        # Note the fasttext_model cant be saved by metaflow, so we just eval here
+        fasttext_model = helpful_funcs.train_fasttext_model(self.output_dir)
+        self.results = helpful_funcs.test_fasttext(self.df_test, fasttext_model)
         self.run_name = "fasttext"
+
         self.next(self.join)
 
     @card
@@ -104,7 +115,7 @@ class HelpfulFlow(FlowSpec):
         Split data into 5
         """
         # TODO we can prob split based on max workers
-        self.helpful_list = np.array_split(self.df, 5)
+        self.helpful_list = np.array_split(self.df_test, 5)
 
         self.next(self.huggingface_predict, foreach="helpful_list")
 
@@ -139,12 +150,21 @@ class HelpfulFlow(FlowSpec):
         sent_scores["pos_match"] = 0
         sent_scores["neg_match"] = 0
         sent_scores["miss"] = 0
+        sent_scores["model"] = "huggingface"
 
         for index, result in enumerate(self.results):
 
             sent_scores["pos_match"] += result["pos_match"]
             sent_scores["neg_match"] = result["neg_match"]
             sent_scores["miss"] = result["miss"]
+
+        num_sents = (
+            sent_scores["pos_match"] + sent_scores["neg_match"] + sent_scores["miss"]
+        )
+        missed_percent = sent_scores["miss"] / num_sents
+        correct_percent = 1 - missed_percent
+        sent_scores["missed_percent"] = missed_percent
+        sent_scores["correct_percent"] = correct_percent
 
         self.run_name = "huggingface"
         self.results = sent_scores

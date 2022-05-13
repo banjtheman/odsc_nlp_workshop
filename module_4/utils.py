@@ -41,6 +41,7 @@ def write_to_file(file_path: str, file_text: str) -> bool:
         logging.error(error)
         return False
 
+
 def save_json(json_path: str, json_data: Any) -> None:
     """
     Purpose:
@@ -143,7 +144,8 @@ def train_fasttext_model(model_loc: str):
     # now = str(datetime.now())
     model.save_model(f"{model_loc}/fasttext.bin")
 
-    return results_json
+    return model
+
 
 def print_results(N: int, p: float, r: float):
     """
@@ -246,6 +248,66 @@ def get_helpful_label_simple(helpful_score):
         return "helpful"
 
 
+def test_fasttext(df, model):
+    """
+    Purpose:
+        test fasttext model with data
+    Args:
+        df - data
+    Returns:
+        sentiment scores: df of the data
+    """
+
+    sentences = list(df["sentence"])
+    labels = list(df["helpful_label"])
+
+    num_sents = len(sentences)
+
+    sent_scores = {}
+    sent_scores["pos_match"] = 0
+    sent_scores["neg_match"] = 0
+    sent_scores["miss"] = 0
+    sent_scores["model"] = "fasttext"
+
+    for index, sentence in enumerate(sentences):
+
+        curr_label = labels[index]
+
+        result = str(model.predict(sentence)[0])
+
+        curr_sent = ""
+
+        if "not_helpful" in result:
+            curr_sent = "pos"
+        else:
+            curr_sent = "neg"
+
+        if curr_sent == "pos" and curr_label == "helpful":
+            sent_scores["pos_match"] += 1
+        elif curr_sent == "neg" and curr_label == "not_helpful":
+            sent_scores["neg_match"] += 1
+        else:
+            sent_scores["miss"] += 1
+
+        # if index > 500:
+        #     break
+
+    # num_sents = 500
+
+    # get percentages
+    missed_percent = sent_scores["miss"] / num_sents
+    correct_percent = 1 - missed_percent
+    sent_scores["missed_percent"] = missed_percent
+    sent_scores["correct_percent"] = correct_percent
+
+    print(f"Missed: {missed_percent}")
+    print(f"Correct: {correct_percent}")
+
+    print(sent_scores)
+
+    return sent_scores
+
+
 def test_vader(df):
     """
     Purpose:
@@ -267,6 +329,7 @@ def test_vader(df):
     sent_scores["pos_match"] = 0
     sent_scores["neg_match"] = 0
     sent_scores["miss"] = 0
+    sent_scores["model"] = "vader"
 
     for index, sentence in enumerate(sentences):
 
@@ -291,11 +354,13 @@ def test_vader(df):
         else:
             sent_scores["miss"] += 1
 
+    missed_percent = sent_scores["miss"] / num_sents
+    correct_percent = 1 - missed_percent
+    sent_scores["missed_percent"] = missed_percent
+    sent_scores["correct_percent"] = correct_percent
+
+    print(f"Missed: {missed_percent}")
+    print(f"Correct: {correct_percent}")
+
     print(sent_scores)
-
-    # get percentages
-    print(f"Pos correct: {sent_scores['pos_match']/num_sents}")
-    print(f"Neg correct: {sent_scores['neg_match']/num_sents}")
-    print(f"Missed: {sent_scores['miss']/num_sents}")
-
     return sent_scores

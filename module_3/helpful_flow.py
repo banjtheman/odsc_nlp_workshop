@@ -26,6 +26,7 @@ class HelpfulFlow(FlowSpec):
 
     # The helpful training data
     train_data = "https://helpful-sentences-from-reviews.s3.amazonaws.com/train.json"
+    test_data = "https://helpful-sentences-from-reviews.s3.amazonaws.com/test.json"
 
     @card
     @step
@@ -39,8 +40,9 @@ class HelpfulFlow(FlowSpec):
         cmd = f"mkdir -p {self.output_dir}"
         os.system(cmd)
 
-        # Get raw data
-        self.raw_data = helpful_funcs.get_data(self.train_data)
+         # Get raw data
+        self.raw_data_train = helpful_funcs.get_data(self.train_data)
+        self.raw_data_test = helpful_funcs.get_data(self.test_data)
         self.next(self.prepare_data)
 
     @card
@@ -51,10 +53,16 @@ class HelpfulFlow(FlowSpec):
         prepare data
         """
         # Transfrom raw data to a dataframe
-        self.df = helpful_funcs.data_to_df(self.raw_data)
+        self.df_train = helpful_funcs.data_to_df(self.raw_data_train)
+        self.df_test = helpful_funcs.data_to_df(self.raw_data_test)
 
         # save df to output folder
-        self.df.to_csv(f"{self.output_dir}/helpful_sentences.csv", index=False)
+        self.df_train.to_csv(
+            f"{self.output_dir}/helpful_sentences_train.csv", index=False
+        )
+        self.df_test.to_csv(
+            f"{self.output_dir}/helpful_sentences_test.csv", index=False
+        )
 
         self.next(self.vader_run)
 
@@ -66,7 +74,7 @@ class HelpfulFlow(FlowSpec):
         Run vader on data
         """
         # Transfrom raw data to a dataframe
-        self.results = helpful_funcs.test_vader(self.df)
+        self.results = helpful_funcs.test_vader(self.df_test)
         self.run_name = "vader"
 
         self.next(self.join)

@@ -27,6 +27,7 @@ class HelpfulFlow(FlowSpec):
 
     # The helpful training data
     train_data = "https://helpful-sentences-from-reviews.s3.amazonaws.com/train.json"
+    test_data = "https://helpful-sentences-from-reviews.s3.amazonaws.com/test.json"
 
     @card
     @step
@@ -41,7 +42,9 @@ class HelpfulFlow(FlowSpec):
         os.system(cmd)
 
         # Get raw data
-        self.raw_data = helpful_funcs.get_data(self.train_data)
+        self.raw_data_train = helpful_funcs.get_data(self.train_data)
+        self.raw_data_test = helpful_funcs.get_data(self.test_data)
+
         self.next(self.prepare_data)
 
     @card
@@ -52,10 +55,12 @@ class HelpfulFlow(FlowSpec):
         prepare data
         """
         # Transfrom raw data to a dataframe
-        self.df = helpful_funcs.data_to_df(self.raw_data)
+        self.df_train = helpful_funcs.data_to_df(self.raw_data_train)
+        self.df_test = helpful_funcs.data_to_df(self.raw_data_test)
 
         # save df to output folder
-        self.df.to_csv(f"{self.output_dir}/helpful_sentences.csv", index=False)
+        self.df_train.to_csv(f"{self.output_dir}/helpful_sentences_train.csv", index=False)
+        self.df_test.to_csv(f"{self.output_dir}/helpful_sentences_test.csv", index=False)
 
         # We can call two functions to run in parallel
         self.next(self.vader_run, self.fasttext_start)
@@ -68,7 +73,7 @@ class HelpfulFlow(FlowSpec):
         Run vader on data
         """
         # Transfrom raw data to a dataframe
-        self.results = helpful_funcs.test_vader(self.df)
+        self.results = helpful_funcs.test_vader(self.df_test)
         self.run_name = "vader"
         self.next(self.join)
 
@@ -80,7 +85,7 @@ class HelpfulFlow(FlowSpec):
         Convert data to fasttext format
         """
 
-        helpful_funcs.convert_csv_to_fast_text_doc(self.df, self.output_dir)
+        helpful_funcs.convert_csv_to_fast_text_doc(self.df_train, self.output_dir)
         self.next(self.fasttext_train)
 
     @card
@@ -91,7 +96,9 @@ class HelpfulFlow(FlowSpec):
         Train fasttext model
         """
 
-        self.results = helpful_funcs.train_fasttext_model(self.output_dir)
+        # Note the fasttext_model cant be saved by metaflow, so we just eval here
+        fasttext_model = helpful_funcs.train_fasttext_model(self.output_dir)
+        self.results = helpful_funcs.test_fasttext(self.df_test,fasttext_model)
         self.run_name = "fasttext"
 
         self.next(self.join)

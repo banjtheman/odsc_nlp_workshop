@@ -18,7 +18,7 @@ python helpful_flow.py show
 python helpful_flow.py run --output_dir test_run
 ```
 
-**Note:** The gitpod instance is slow, so you can comment out lines [122-123](https://github.com/banjtheman/odsc_nlp_workshop/blob/main/module_5/utils.py#L121-L123) in utils.py and [126](https://github.com/banjtheman/odsc_nlp_workshop/blob/main/module_5/utils.py#L126) to test only a subset of data if not running on your personal machine.  
+**Note:** The gitpod instance is slow, so you can comment out lines [122-123](https://github.com/banjtheman/odsc_nlp_workshop/blob/main/module_5/utils.py#L122-L125) in utils.py to test only a subset of data if not running on your personal machine.  
 
 
 3. View the data 
@@ -27,7 +27,6 @@ python helpful_flow.py run --output_dir test_run
 cat test_run/huggingface_results.json
 ```
 
-4. Why was the huggingface model so good? You can train your own model with train.py (will take couple hours...) or try out other [models].(https://huggingface.co/models?pipeline_tag=text-classification&sort=downloads)
+4. Why was the huggingface model so good?  
 
-
-
+You can train your own model with `train.py` (will take couple hours...) or try out other [models].(https://huggingface.co/models?pipeline_tag=text-classification&sort=downloads)

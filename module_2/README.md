@@ -21,7 +21,8 @@ python helpful_flow.py run --output_dir test_run
 3. View the data 
 
 ```bash
-head test_run/helpful_sentences.csv
+head test_run/helpful_sentences_train.csv
+head test_run/helpful_sentences_test.csv
 ```
 
 

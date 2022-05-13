@@ -122,6 +122,7 @@ def test_vader(df):
     sent_scores["pos_match"] = 0
     sent_scores["neg_match"] = 0
     sent_scores["miss"] = 0
+    sent_scores["model"] = "vader"
 
     for index, sentence in enumerate(sentences):
 
@@ -146,11 +147,15 @@ def test_vader(df):
         else:
             sent_scores["miss"] += 1
 
-    print(sent_scores)
-
     # get percentages
-    print(f"Pos correct: {sent_scores['pos_match']/num_sents}")
-    print(f"Neg correct: {sent_scores['neg_match']/num_sents}")
-    print(f"Missed: {sent_scores['miss']/num_sents}")
+    missed_percent = sent_scores["miss"] / num_sents
+    correct_percent = 1 - missed_percent
+    sent_scores["missed_percent"] = missed_percent
+    sent_scores["correct_percent"] = correct_percent
+
+    print(f"Missed: {missed_percent}")
+    print(f"Correct: {correct_percent}")
+
+    print(sent_scores)
 
     return sent_scores
