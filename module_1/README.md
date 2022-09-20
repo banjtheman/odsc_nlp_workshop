@@ -21,7 +21,7 @@ python hello_flow.py run
 3. Run the card command to generate card html
 
 ```bash
-python hello_flow.py card view start test.html
+python hello_flow.py card get start test.html
 ```
 
 4. View card html in browser
